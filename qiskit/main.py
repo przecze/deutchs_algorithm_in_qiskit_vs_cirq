@@ -31,32 +31,37 @@ def get_output(cin, qr):
     print(cin)
     print(to_braket(snap))
 
-# deutsch
 
-regs = [QuantumRegister(2, 'q'), ClassicalRegister(1, 'c')]
+def run_deutsch():
+    regs = [QuantumRegister(2, 'q'), ClassicalRegister(1, 'c')]
 
 # state initialization: apply x on output bit, and H on all
-init = QuantumCircuit(*regs)
-init.x(1)
-init.h(0)
-init.h(1)
-init.barrier()
+    init = QuantumCircuit(*regs)
+    init.x(1)
+    init.h(0)
+    init.h(1)
+    init.barrier()
 
 # balanced is a c-not - output depends on input
-balanced = QuantumCircuit(*regs)
-balanced.cx(0,1)
-balanced.barrier()
+    balanced = QuantumCircuit(*regs)
+    balanced.cx(0,1)
+    balanced.barrier()
+
+# unity
+    unbalanced0 = QuantumCircuit(*regs)
+    unbalanced0.barrier()
 
 # unbalanced is a 'not' - output is fliped independent of input
-unbalanced = QuantumCircuit(*regs)
-unbalanced.x(1)
-unbalanced.barrier()
+    unbalanced1 = QuantumCircuit(*regs)
+    unbalanced1.x(1)
+    unbalanced1.barrier()
 
 # at the end, apply h to input bit and measure it
-end = QuantumCircuit(*regs)
-end.h(0)
-end.measure(0, 0)
+    end = QuantumCircuit(*regs)
+    end.h(0)
+    end.measure(0, 0)
 
 # expected: only 1s for balanced, only 0s for inbalanced
-print("balanced", sim.run(qs.transpile(init+balanced+end, sim), shots=100).result().get_counts())
-print("unbalanced", sim.run(qs.transpile(init+unbalanced+end, sim), shots=100).result().get_counts())
+    for oracle in (balanced, unbalanced0, unbalanced1):
+        print(init + oracle + end)
+        print(sim.run(qs.transpile(init+balanced+end, sim), shots=100).result().get_counts())
