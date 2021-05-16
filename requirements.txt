@@ -1,1 +1,2 @@
-qiskit
+qiskit==0.25.2
+cirq==0.10.0
